@@ -27,10 +27,8 @@ class Bluetooth_HID
   public:
     Bluetooth_HID(void);
 	void startBluetooth(void);
-	void getUserInput(char[], uint8_t);
-	//forse prender√† in input una stringa
-	void sendCommand(void);
-	void receiveData(void);
+	//forse prender‡†in input una stringa
+	void sendCommand(char*);
 };
 
 #endif

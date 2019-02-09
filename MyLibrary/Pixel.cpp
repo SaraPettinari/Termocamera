@@ -4,7 +4,7 @@
 #include "Pixel.h"
 
 Adafruit_AMG88xx amg; 
-//float gesture[5];
+Bluetooth_HID bluetooth;
 
 Pixel :: Pixel (void){
 }
@@ -25,8 +25,12 @@ void Pixel :: getPixel(float matrix[ARRAY_SIZE][ARRAY_SIZE]){
 	int k = 0;
 	for(int i = 0; i < ARRAY_SIZE; i ++){
 		for(int j = 0; j < ARRAY_SIZE; j++){
-			matrix[i][j] = pixels[j];
+			matrix[i][j] = pixels[k];
+		//	Serial.print(matrix[i][j]);
+		//	if((j+1)%ARRAY_SIZE != 0)	Serial.print(", ");
+			k++;
 		}
+	//	Serial.println();
 	}
     Serial.println();
 
@@ -90,6 +94,20 @@ bool Pixel :: containsThreeSplitted(int matrix[2][ARRAY_SIZE]){
 		return false;
 }
 
+bool Pixel :: numThreeSplitted(int matrix[2][ARRAY_SIZE]){
+	int three = 0;
+	for(int i = 0; i < 2; i++){
+		for(int j = 0; j < ARRAY_SIZE; j++){
+			if(matrix[i][j] == 3)
+				three++;
+		}
+	}
+	if(three >= 10)
+		return true;
+	else
+		return false;
+}
+
 /**
 matrix: matrice iniziale
 splitted matrix: matrice divisa in righe o colonne da 2
@@ -146,20 +164,20 @@ int Pixel :: matrixAnalysis(int matrix[ARRAY_SIZE][ARRAY_SIZE], int gestureVal){
 	//non ? ancora stato ipotizzato un gesto
 	if(gestureVal == 0){
 		//se sembra da sx a dx
-		if(containsThreeSplitted(splittedMatrixLeft) && !containsThreeSplitted(splittedMatrixRight)){
+		if(containsThreeSplitted(splittedMatrixLeft) && !containsThreeSplitted(splittedMatrixRight) && numThreeSplitted(splittedMatrixLeft)){
 			Serial.println("SX");
 			return 1;
 		}
 		//se sembra da dx a sx
-		else if(containsThreeSplitted(splittedMatrixRight) && !containsThreeSplitted(splittedMatrixLeft)){
+		else if(containsThreeSplitted(splittedMatrixRight) && !containsThreeSplitted(splittedMatrixLeft) && numThreeSplitted(splittedMatrixRight)){
 			Serial.println("DX");
 			return 2;
 		}
-		else if(containsThreeSplitted(splittedMatrixBottom) && !containsThreeSplitted(splittedMatrixTop)){
+		else if(containsThreeSplitted(splittedMatrixBottom) && !containsThreeSplitted(splittedMatrixTop) && numThreeSplitted(splittedMatrixBottom)){
 			Serial.println("BOT");
 			return 3;
 		}
-		else if(containsThreeSplitted(splittedMatrixTop) && !containsThreeSplitted(splittedMatrixBottom)){
+		else if(containsThreeSplitted(splittedMatrixTop) && !containsThreeSplitted(splittedMatrixBottom) && numThreeSplitted(splittedMatrixTop)){
 			Serial.println("TOP");
 			return 4;
 		}
@@ -167,32 +185,55 @@ int Pixel :: matrixAnalysis(int matrix[ARRAY_SIZE][ARRAY_SIZE], int gestureVal){
 		else
 			return 0;
 	}
+	//sembra essere riconosciuto da SX a DX
+	else if(gestureVal == 1){
+		//se il calore si ? spostato a DX
+		if(containsThreeSplitted(splittedMatrixRight) && !containsThreeSplitted(splittedMatrixLeft)){
+			Serial.println("SX-Recognized");
+			bluetooth.sendCommand("MEDIANEXT");
+			return 11;
+		}
+		//non si ? ancora certi del gesto
+		else 
+			return 1;
+	}
+	//sembra essere riconosciuto da DX a SX
+	else if(gestureVal == 2){
+		//se il calore si ? spostato a SX
+		if(containsThreeSplitted(splittedMatrixLeft) && !containsThreeSplitted(splittedMatrixRight)){
+			Serial.println("DX-Recognized");
+			bluetooth.sendCommand("MEDIAPREVIOUS");
+			return 22;
+		}
+		//non si ? ancora certi del gesto
+		else 
+			return 2;
+	}
+	//sembra essere riconosciuto da BOT a TOP
+	else if(gestureVal == 3){
+		//se il calore si ? spostato a TOP
+		if(containsThreeSplitted(splittedMatrixTop) && !containsThreeSplitted(splittedMatrixBottom)){
+			Serial.println("BOT-Recognized");
+			bluetooth.sendCommand("VOLUME+");
+			return 33;
+		}
+		//non si ? ancora certi del gesto
+		else 
+			return 3;
+	}
+	//sembra essere riconosciuto da TOP a BOT
+	else if(gestureVal == 4){
+		//se il calore si ? spostato a BOT
+		if(containsThreeSplitted(splittedMatrixBottom) && !containsThreeSplitted(splittedMatrixTop)){
+			Serial.println("TOP-Recognized");
+			bluetooth.sendCommand("VOLUME-");
+			return 44;
+		}
+		//non si ? ancora certi del gesto
+		else 
+			return 4;
+	}
+	//non ? stato riconosciuto nessun gesto
 	else 
 		return 0;
-	
-/*	if(containsThreeSplitted(splittedMatrixCompare) && !containsThreeSplitted(splittedMatrix)){
-		Serial.print("OK-L");
-		return 5;
-	}
-	else if(containsThreeSplitted(splittedMatrix) && !containsThreeSplitted(splittedMatrixCompare)){
-		Serial.println("OK");
-		return 1;
-		}
-	else
-		return 0;*/
-	
-	/*if(gestureVal == 0){
-	if(containsThree(splittedMatrix) and !containsThree(splittedMatrixCompare)){
-	//	gestureVal = 1;
-		Serial.println("OK");
-		return 1;
-		}
-	}
-	if(gestureVal == 1){
-		if(!containsThree(splittedMatrix) and containsThree(splittedMatrixCompare)){
-	//	gestureVal = 11; //Left recognized
-		Serial.print("OK-L");
-		return 11;
-		}
-	}*/
 }
