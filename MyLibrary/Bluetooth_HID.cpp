@@ -6,7 +6,7 @@
 #include "Adafruit_BluefruitLE_UART.h"
 #include "Pixel.h"
 
-// Create the bluefruit object using connection with MODE Pin
+// Creazione dell'oggetto bluefruit object usando la connessione con il MODE Pin
 Adafruit_BluefruitLE_UART ble(BLUEFRUIT_HWSERIAL_NAME, BLUEFRUIT_UART_MODE_PIN);
 
 void error(const __FlashStringHelper*err) {
@@ -17,6 +17,9 @@ void error(const __FlashStringHelper*err) {
 Bluetooth_HID :: Bluetooth_HID (void){
 }
 
+/**
+	Metodo di avvio del bluetooth
+*/
 void Bluetooth_HID :: startBluetooth (void) {
 
   if ( !ble.begin(VERBOSE_MODE) )
@@ -53,9 +56,13 @@ void Bluetooth_HID :: startBluetooth (void) {
  // Serial.println();
 }
 
-
+/**
+	Metodo per inviare il comando riconosciuto alla tastiera del dispositivo
+	@command: comando corrispondente alla gesture letta
+*/
 void Bluetooth_HID :: sendCommand(char *command){
 	ble.print("AT+BleHidControlKey=");
+	//invio del comando in input
     ble.println(command);
     ble.print("\n");
 
@@ -65,14 +72,12 @@ void Bluetooth_HID :: sendCommand(char *command){
     }else
     {
       Serial.println( F("FAILED!") );
-      // Failed, probably pairing is not complete yet
+      // Errore: nessun dispositivo è accoppiato col bluetooth
       Serial.println( F("Please make sure Bluefruit is paired and try again") );
     }
 }
 
-
 /**
-TODO: riconoscimento gesture e creazione stringa corrispondente
 	"- PLAYPAUSE" "\n"
     "- MEDIANEXT" "\n"
     "- MEDIAPREVIOUS" "\n"

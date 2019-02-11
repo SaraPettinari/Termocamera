@@ -20,14 +20,13 @@
 #define	VOLUME_DOWN				VOLUME-
 
 
-// library interface description
 class Bluetooth_HID
 {
-  // user-accessible "public" interface
   public:
     Bluetooth_HID(void);
+	//avvio del bluetooth
 	void startBluetooth(void);
-	//forse prenderà in input una stringa
+	//invio del comando alla tastiera
 	void sendCommand(char*);
 };
 

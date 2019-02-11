@@ -9,9 +9,12 @@ Bluetooth_HID bluetooth;
 Pixel :: Pixel (void){
 }
 
+/**
+	Metodo di lettura dei pixel letti dalla termocamera
+*/
 void Pixel :: getPixel(float matrix[ARRAY_SIZE][ARRAY_SIZE]){
 	bool status;
-    // start reading pixels
+    // avviata la lettura dei pixels
     status = amg.begin();
     if (!status) {
         Serial.println("Could not find a valid AMG88xx sensor, check wiring!");
@@ -20,7 +23,7 @@ void Pixel :: getPixel(float matrix[ARRAY_SIZE][ARRAY_SIZE]){
 	
 	float pixels[AMG88xx_PIXEL_ARRAY_SIZE];
 	
-	//read all the pixels
+	//lettura di tutti i pixel
     amg.readPixels(pixels);
 	int k = 0;
 	for(int i = 0; i < ARRAY_SIZE; i ++){
@@ -34,10 +37,14 @@ void Pixel :: getPixel(float matrix[ARRAY_SIZE][ARRAY_SIZE]){
 	}
     Serial.println();
 
-    //delay a second
+    //delay di un secondo
     delay(1);
 }
 
+
+/**
+	Metodo di stampa della matrice
+*/
 void Pixel :: printMatrix(int matrix [ARRAY_SIZE][ARRAY_SIZE]){
 	//stampa della matrice 8x8 con le temperature percepite
     for(int i = 0; i < ARRAY_SIZE; i++){
@@ -58,7 +65,8 @@ La matrice di pixel letti viene semplificata nel seguente modo:
 */
 void Pixel :: matrixConverter(int matrix[ARRAY_SIZE][ARRAY_SIZE]){
 	float convertedMatrix[ARRAY_SIZE][ARRAY_SIZE];
-	getPixel(convertedMatrix);
+	getPixel(convertedMatrix); //lettura dei pixel
+	//semplificazione della matrice
 	for(int i = 0; i < ARRAY_SIZE; i++){
 		for(int j = 0; j < ARRAY_SIZE; j++){
 			float appoggio = convertedMatrix[i][j];
@@ -74,6 +82,10 @@ void Pixel :: matrixConverter(int matrix[ARRAY_SIZE][ARRAY_SIZE]){
 	}
 }
 
+/**
+	@matrix: matrice presa in input 8x8
+	@return: true se la matrice in input contiene almeno un 3
+*/
 bool Pixel :: containsThree(int matrix[ARRAY_SIZE][ARRAY_SIZE]){
 	for(int i = 0; i < ARRAY_SIZE; i++){
 		for(int j = 0; j < ARRAY_SIZE; j++){
@@ -84,6 +96,10 @@ bool Pixel :: containsThree(int matrix[ARRAY_SIZE][ARRAY_SIZE]){
 		return false;
 }
 
+/**
+	@matrix: matrice presa in input 2x8
+	@return: true se la matrice in input contiene almeno un 3
+*/
 bool Pixel :: containsThreeSplitted(int matrix[2][ARRAY_SIZE]){
 	for(int i = 0; i < 2; i++){
 		for(int j = 0; j < ARRAY_SIZE; j++){
@@ -94,6 +110,10 @@ bool Pixel :: containsThreeSplitted(int matrix[2][ARRAY_SIZE]){
 		return false;
 }
 
+/**
+	@matrix: matrice in input
+	@return: il numero di pixel = 3 letti	
+*/
 bool Pixel :: numThreeSplitted(int matrix[2][ARRAY_SIZE]){
 	int three = 0;
 	for(int i = 0; i < 2; i++){
@@ -109,13 +129,13 @@ bool Pixel :: numThreeSplitted(int matrix[2][ARRAY_SIZE]){
 }
 
 /**
-matrix: matrice iniziale
-splitted matrix: matrice divisa in righe o colonne da 2
-c: 
-	= t: matrice divisa per righe dall'alto
-	= b: matrice divisa per righe dal basso
-	= l: matrice divisa per colonne da sinistra
-	= r: matrice divisa per colonne da destra
+	@matrix: matrice iniziale
+	@splittedMatrix: matrice divisa in righe o colonne da 2
+	@c
+		= t: matrice divisa per righe dall'alto
+		= b: matrice divisa per righe dal basso
+		= l: matrice divisa per colonne da sinistra
+		= r: matrice divisa per colonne da destra
 */
 void Pixel :: matrixSplit(int matrix[ARRAY_SIZE][ARRAY_SIZE], int splittedMatrix[2][ARRAY_SIZE], char c){
 	int i = 0;	//indice per matrice iniziale
@@ -152,11 +172,16 @@ void Pixel :: matrixSplit(int matrix[ARRAY_SIZE][ARRAY_SIZE], int splittedMatrix
 	}
 }
 
+/**
+	Metodo di analisi della matrice
+	@matrix: matrice da analizzare
+	@gestureVal: valore iniziale della gesture
+*/
 int Pixel :: matrixAnalysis(int matrix[ARRAY_SIZE][ARRAY_SIZE], int gestureVal){
-	int splittedMatrixLeft[2][ARRAY_SIZE];
-	int splittedMatrixRight[2][ARRAY_SIZE];
-	int splittedMatrixBottom[2][ARRAY_SIZE];
-	int splittedMatrixTop[2][ARRAY_SIZE];
+	int splittedMatrixLeft[2][ARRAY_SIZE];	//matrice splittata a sx
+	int splittedMatrixRight[2][ARRAY_SIZE];	//matrice splittata a dx
+	int splittedMatrixBottom[2][ARRAY_SIZE];//matrice splittata dal basso
+	int splittedMatrixTop[2][ARRAY_SIZE];	//matrice splittata dall'alto
 	matrixSplit(matrix, splittedMatrixLeft, 'l');
 	matrixSplit(matrix, splittedMatrixRight, 'r');
 	matrixSplit(matrix, splittedMatrixBottom, 'b');
@@ -173,10 +198,12 @@ int Pixel :: matrixAnalysis(int matrix[ARRAY_SIZE][ARRAY_SIZE], int gestureVal){
 			Serial.println("DX");
 			return 2;
 		}
+		//se sembra dal basso all'alto
 		else if(containsThreeSplitted(splittedMatrixBottom) && !containsThreeSplitted(splittedMatrixTop) && numThreeSplitted(splittedMatrixBottom)){
 			Serial.println("BOT");
 			return 3;
 		}
+		//se sembra dall'alto al basso
 		else if(containsThreeSplitted(splittedMatrixTop) && !containsThreeSplitted(splittedMatrixBottom) && numThreeSplitted(splittedMatrixTop)){
 			Serial.println("TOP");
 			return 4;
@@ -190,6 +217,7 @@ int Pixel :: matrixAnalysis(int matrix[ARRAY_SIZE][ARRAY_SIZE], int gestureVal){
 		//se il calore si ? spostato a DX
 		if(containsThreeSplitted(splittedMatrixRight) && !containsThreeSplitted(splittedMatrixLeft)){
 			Serial.println("SX-Recognized");
+			//viene inviato al bluetooth il comando corrispondente
 			bluetooth.sendCommand("MEDIANEXT");
 			return 11;
 		}
@@ -202,6 +230,7 @@ int Pixel :: matrixAnalysis(int matrix[ARRAY_SIZE][ARRAY_SIZE], int gestureVal){
 		//se il calore si ? spostato a SX
 		if(containsThreeSplitted(splittedMatrixLeft) && !containsThreeSplitted(splittedMatrixRight)){
 			Serial.println("DX-Recognized");
+			//viene inviato al bluetooth il comando corrispondente
 			bluetooth.sendCommand("MEDIAPREVIOUS");
 			return 22;
 		}
@@ -214,6 +243,7 @@ int Pixel :: matrixAnalysis(int matrix[ARRAY_SIZE][ARRAY_SIZE], int gestureVal){
 		//se il calore si ? spostato a TOP
 		if(containsThreeSplitted(splittedMatrixTop) && !containsThreeSplitted(splittedMatrixBottom)){
 			Serial.println("BOT-Recognized");
+			//viene inviato al bluetooth il comando corrispondente
 			bluetooth.sendCommand("VOLUME+");
 			return 33;
 		}
@@ -226,6 +256,7 @@ int Pixel :: matrixAnalysis(int matrix[ARRAY_SIZE][ARRAY_SIZE], int gestureVal){
 		//se il calore si ? spostato a BOT
 		if(containsThreeSplitted(splittedMatrixBottom) && !containsThreeSplitted(splittedMatrixTop)){
 			Serial.println("TOP-Recognized");
+			//viene inviato al bluetooth il comando corrispondente
 			bluetooth.sendCommand("VOLUME-");
 			return 44;
 		}
