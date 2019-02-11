@@ -9,34 +9,34 @@
 
 Bluetooth_HID bluehid;
 Pixel pixelib;
-bool movimento = false;
-int matrix[8][8];
-int splittedMatrix[2][8];
-int gesture = 0;
+bool movimento = false; //controllo del movimento
+int matrix[8][8]; //matrice dei pixel letti
+int splittedMatrix[2][8]; //matrice suddivisa
+int gesture = 0;  //controllo del gesto visto
 
 void setup() {
   Serial.begin(115200);
+  //avviato il bluetooth
   bluehid.startBluetooth();
 }
 
 void loop() {
+  //creazione della matrice di pixel letti
   pixelib.matrixConverter(matrix);
   pixelib.printMatrix(matrix);  
  
   //non è stato ancora riconosciuto un movimento
   if(movimento == false){
+    //ipotizzato un gesto
     if(pixelib.containsThree(matrix)){
       movimento = true;
       }
     }
-    //è stata riconosciuta una gesture
+    //è stata ipotizzata una gesture
     if(movimento == true){
-      //TODO: metodo di riconoscimento
-      Serial.println(gesture);
       int temp = pixelib.matrixAnalysis(matrix, gesture);
       gesture = temp;
-      Serial.println(gesture);
-      //l'ultima matrice letta non ha percepito calore
+      //l'ultima matrice letta non percepisce più calore 
       if(!pixelib.containsThree(matrix)){
         movimento = false;
         gesture = 0;
