@@ -1,4 +1,3 @@
-// ensure this library description is only included once
 #ifndef Bluetooth_HID_h
 #define Bluetooth_HID_h
 
