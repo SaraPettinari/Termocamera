@@ -1,4 +1,3 @@
-// ensure this library description is only included once
 #ifndef Pixel_h
 #define Pixel_h
 #define	ARRAY_SIZE	8
