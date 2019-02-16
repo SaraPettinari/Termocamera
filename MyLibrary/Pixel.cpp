@@ -186,7 +186,7 @@ int Pixel :: matrixAnalysis(int matrix[ARRAY_SIZE][ARRAY_SIZE], int gestureVal){
 	matrixSplit(matrix, splittedMatrixRight, 'r');
 	matrixSplit(matrix, splittedMatrixBottom, 'b');
 	matrixSplit(matrix, splittedMatrixTop, 't');
-	//non ? ancora stato ipotizzato un gesto
+	//non è ancora stato ipotizzato un gesto
 	if(gestureVal == 0){
 		//se sembra da sx a dx
 		if(containsThreeSplitted(splittedMatrixLeft) && !containsThreeSplitted(splittedMatrixRight) && numThreeSplitted(splittedMatrixLeft)){
@@ -208,63 +208,63 @@ int Pixel :: matrixAnalysis(int matrix[ARRAY_SIZE][ARRAY_SIZE], int gestureVal){
 			Serial.println("TOP");
 			return 4;
 		}
-		//non ? stato riconosciuto nessun gesto
+		//non è stato riconosciuto nessun gesto
 		else
 			return 0;
 	}
 	//sembra essere riconosciuto da SX a DX
 	else if(gestureVal == 1){
-		//se il calore si ? spostato a DX
+		//se il calore si è spostato a DX
 		if(containsThreeSplitted(splittedMatrixRight) && !containsThreeSplitted(splittedMatrixLeft)){
 			Serial.println("SX-Recognized");
 			//viene inviato al bluetooth il comando corrispondente
 			bluetooth.sendCommand("MEDIANEXT");
 			return 11;
 		}
-		//non si ? ancora certi del gesto
+		//non si è ancora certi del gesto
 		else 
 			return 1;
 	}
 	//sembra essere riconosciuto da DX a SX
 	else if(gestureVal == 2){
-		//se il calore si ? spostato a SX
+		//se il calore si è spostato a SX
 		if(containsThreeSplitted(splittedMatrixLeft) && !containsThreeSplitted(splittedMatrixRight)){
 			Serial.println("DX-Recognized");
 			//viene inviato al bluetooth il comando corrispondente
 			bluetooth.sendCommand("MEDIAPREVIOUS");
 			return 22;
 		}
-		//non si ? ancora certi del gesto
+		//non si è ancora certi del gesto
 		else 
 			return 2;
 	}
 	//sembra essere riconosciuto da BOT a TOP
 	else if(gestureVal == 3){
-		//se il calore si ? spostato a TOP
+		//se il calore si è spostato a TOP
 		if(containsThreeSplitted(splittedMatrixTop) && !containsThreeSplitted(splittedMatrixBottom)){
 			Serial.println("BOT-Recognized");
 			//viene inviato al bluetooth il comando corrispondente
 			bluetooth.sendCommand("VOLUME+");
 			return 33;
 		}
-		//non si ? ancora certi del gesto
+		//non si è ancora certi del gesto
 		else 
 			return 3;
 	}
 	//sembra essere riconosciuto da TOP a BOT
 	else if(gestureVal == 4){
-		//se il calore si ? spostato a BOT
+		//se il calore si è spostato a BOT
 		if(containsThreeSplitted(splittedMatrixBottom) && !containsThreeSplitted(splittedMatrixTop)){
 			Serial.println("TOP-Recognized");
 			//viene inviato al bluetooth il comando corrispondente
 			bluetooth.sendCommand("VOLUME-");
 			return 44;
 		}
-		//non si ? ancora certi del gesto
+		//non si è ancora certi del gesto
 		else 
 			return 4;
 	}
-	//non ? stato riconosciuto nessun gesto
+	//non è stato riconosciuto nessun gesto
 	else 
 		return 0;
 }
