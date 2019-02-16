@@ -48,13 +48,14 @@ void loop() {
     //read all the pixels
     amg.readPixels(pixels);
 
-    Serial.print("[");
+    //stampa della matrice 8x8 con le temperature percepite
     for(int i=1; i<=AMG88xx_PIXEL_ARRAY_SIZE; i++){
       Serial.print(pixels[i-1]);
-      Serial.print(", ");
+      if(i%8 != 0) Serial.print(",");
+      //dopo 8 pixel va a capo
       if( i%8 == 0 ) Serial.println();
     }
-    Serial.println("]");
+
     Serial.println();
 
     //delay a second
